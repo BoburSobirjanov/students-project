@@ -25,5 +25,11 @@ public class StudentInfoResume {
 
     private String jobType;
 
+    private String languages;
+
+    private String linkedIn;
+
+    private String telegramUsername;
+
 
 }

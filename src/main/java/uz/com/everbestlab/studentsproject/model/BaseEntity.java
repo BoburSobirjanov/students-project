@@ -27,8 +27,6 @@ public abstract class BaseEntity {
 
     protected LocalDateTime deletedTime;
 
-    protected UUID deletedBy;
-
     @Column(columnDefinition = "boolean default false")
     protected boolean isDeleted;
 }
