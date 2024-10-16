@@ -16,3 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   application:
     name: STUDENTS-PROJECT
+  servlet:
+    multipart:
+      max-request-size: 25MB
+      max-file-size: 15MB
