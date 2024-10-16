@@ -45,7 +45,6 @@ public class FileService {
         PdfWriter writer = new PdfWriter(out);
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
-        Path picturePath = Paths.get(student.getPicturePath());
         Paragraph infoParagraph = new Paragraph("RESUME")
                 .setBold()
                 .setTextAlignment(TextAlignment.CENTER)
@@ -53,6 +52,8 @@ public class FileService {
                 .setBorder(new SolidBorder(1));
 
         document.add(infoParagraph);
+        if (student.getPicturePath() != null){
+            Path picturePath = Paths.get(student.getPicturePath());
         try {
             Image img = new Image(ImageDataFactory.create(picturePath.toAbsolutePath().toString()));
             img.setWidth(100);
@@ -60,6 +61,7 @@ public class FileService {
             document.add(img);
         } catch (Exception e) {
             throw new RuntimeException("Failed to add picture to the PDF", e);
+            }
         }
         document.add(new Paragraph("Full name: "+student.getFullName()).setBold());
         document.add(new Paragraph("📞Phone number: " + studentInfoResume.getPhoneNumber()));

@@ -183,6 +183,9 @@ public class StudentServiceImpl implements StudentService {
     public Resource getUserPicture(UUID id) throws MalformedURLException {
         Student user = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
+        if (user.getPicturePath()==null){
+            throw new DataNotFoundException("Picture not found for this user!");
+        }
         Path picturePath = Paths.get(user.getPicturePath());
         Resource resource = new UrlResource(picturePath.toUri());
         if (!resource.exists() || !resource.isReadable()) {
