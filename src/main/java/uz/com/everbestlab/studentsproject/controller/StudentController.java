@@ -1,13 +1,16 @@
 package uz.com.everbestlab.studentsproject.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import uz.com.everbestlab.studentsproject.model.dto.request.user.StudentDto;
 import uz.com.everbestlab.studentsproject.model.dto.request.user.StudentInfoResume;
 import uz.com.everbestlab.studentsproject.model.dto.response.StandardResponse;
@@ -16,6 +19,8 @@ import uz.com.everbestlab.studentsproject.model.entity.Student;
 import uz.com.everbestlab.studentsproject.service.FileService;
 import uz.com.everbestlab.studentsproject.service.student.StudentService;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -44,12 +49,15 @@ public class StudentController {
 
 
 
+
     @GetMapping("/get-by-id/{id}")
     public StandardResponse<StudentResponse> getById(
             @PathVariable UUID id
     ){
         return studentService.getById(id);
     }
+
+
 
 
 
@@ -70,6 +78,7 @@ public class StudentController {
 
 
 
+
     @PutMapping("/{id}/update")
     public StandardResponse<StudentResponse> update(
             @RequestBody StudentDto studentDto,
@@ -77,6 +86,10 @@ public class StudentController {
     ){
         return studentService.update(studentDto,id);
     }
+
+
+
+
 
 
 
@@ -89,6 +102,45 @@ public class StudentController {
         Pageable pageable = PageRequest.of(page, size);
        return studentService.findAllStudents(pageable);
     }
+
+
+
+
+
+
+
+    @PostMapping("/{id}/upload-picture")
+    public ResponseEntity<String> uploadUserPicture(
+            @PathVariable UUID id,
+            @RequestParam("picture") MultipartFile file) {
+        try {
+            String fileName = studentService.saveStudentPicture(id, file);
+            return ResponseEntity.ok("Picture uploaded successfully: " + fileName);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload picture.");
+        }
+    }
+
+
+
+
+
+
+
+
+    @GetMapping("/{id}/get-picture")
+    public ResponseEntity<Resource> getUserPicture(
+            @PathVariable UUID id) throws MalformedURLException {
+        Resource resource = studentService.getUserPicture(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
+    }
+
+
+
+
+
 
 
     @GetMapping("{id}/create-resume")

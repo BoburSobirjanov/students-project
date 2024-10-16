@@ -41,4 +41,6 @@ public class Student extends BaseEntity {
 
     @ManyToOne
     private University university;
+
+    private String picturePath;
 }

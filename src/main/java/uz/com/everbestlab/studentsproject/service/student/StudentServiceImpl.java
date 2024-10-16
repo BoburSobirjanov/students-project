@@ -2,9 +2,12 @@ package uz.com.everbestlab.studentsproject.service.student;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uz.com.everbestlab.studentsproject.exception.DataNotFoundException;
 import uz.com.everbestlab.studentsproject.model.dto.request.user.StudentDto;
 import uz.com.everbestlab.studentsproject.model.dto.response.*;
@@ -14,6 +17,12 @@ import uz.com.everbestlab.studentsproject.repository.SpecializationRepository;
 import uz.com.everbestlab.studentsproject.repository.StudentRepository;
 import uz.com.everbestlab.studentsproject.repository.UniversityRepository;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,8 +37,6 @@ public class StudentServiceImpl implements StudentService {
     private final SpecializationRepository specializationRepository;
     private final UniversityRepository universityRepository;
     private final ModelMapper modelMapper;
-
-
 
 
     @Override
@@ -149,5 +156,38 @@ public class StudentServiceImpl implements StudentService {
             throw new DataNotFoundException("Students not found!");
         }
         return students;
+    }
+
+
+
+    @Override
+    public String saveStudentPicture(UUID id, MultipartFile file) throws IOException {
+        Student student = studentRepository.getStudentById(id);
+        if (student==null){
+            throw new DataNotFoundException("Student not found!");
+        }
+        String fileName = student.getId().toString() + "_" + file.getOriginalFilename();
+        String uploadDir = "D://forImages";
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        student.setPicturePath(filePath.toString());
+        studentRepository.save(student);
+
+        return fileName;
+    }
+
+
+
+
+    @Override
+    public Resource getUserPicture(UUID id) throws MalformedURLException {
+        Student user = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        Path picturePath = Paths.get(user.getPicturePath());
+        Resource resource = new UrlResource(picturePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new RuntimeException("File not found or not readable");
+        }
+        return resource;
     }
 }
